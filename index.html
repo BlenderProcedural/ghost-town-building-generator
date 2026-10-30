@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ghost Town Building Generator</title>
+<meta name="description" content="Procedural Geometry Nodes generator for weathered small-town and ghost-town buildings for Blender – interactive 3D preview.">
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+<style>
+  :root {
+    --bg: #121212; --panel: #1b1b1b; --panel2: #222; --line: #2e2e2e;
+    --text: #ebe6de; --muted: #9b958c; --accent: #c8642e; --accent2: #e3a04f; --cool: #7f9fb8;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color: var(--accent2); }
+  img { max-width: 100%; display: block; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 0 20px; }
+  .eyebrow { text-transform: uppercase; letter-spacing: .18em; font-size: 12px; color: var(--accent2); font-weight: 600; }
+  h1 { font-size: clamp(34px, 5vw, 58px); line-height: 1.02; margin: 10px 0 14px; letter-spacing: -.01em; }
+  h2 { font-size: clamp(24px, 3vw, 34px); margin: 0 0 8px; }
+  h3 { margin: 0 0 6px; font-size: 18px; }
+  p.lede { color: #cfc9c0; font-size: 18px; max-width: 34em; }
+  section { padding: 64px 0; border-top: 1px solid var(--line); }
+  .sub { color: var(--muted); max-width: 46em; margin: 0 0 28px; }
+
+  /* hero */
+  .hero { padding: 36px 0 48px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px; align-items: center; }
+  .stats { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 26px; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; min-width: 112px; }
+  .stat b { display: block; font-size: 22px; color: var(--accent2); line-height: 1.1; }
+  .stat span { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+  .cta { display: inline-flex; gap: 12px; flex-wrap: wrap; }
+  .btn { display: inline-block; padding: 11px 18px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel2); color: var(--text);
+         text-decoration: none; font-weight: 600; cursor: pointer; font-size: 14px; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn:hover { filter: brightness(1.12); }
+
+  /* 3D viewer */
+  .viewer { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--line);
+            background: radial-gradient(ellipse at 50% 40%, #2b2b2b 0%, #161616 70%); transition: background .6s; }
+  .viewer.night { background: radial-gradient(ellipse at 50% 40%, #141a24 0%, #07090d 75%); }
+  model-viewer { width: 100%; height: min(72vh, 640px); --poster-color: transparent; --progress-bar-color: var(--accent); }
+  .toolbar { position: absolute; left: 12px; right: 12px; top: 12px; display: flex; gap: 8px; flex-wrap: wrap; pointer-events: none; }
+  .toolbar .grp { display: inline-flex; background: rgba(18,18,18,.78); border: 1px solid var(--line); border-radius: 9px; padding: 3px; pointer-events: auto; backdrop-filter: blur(6px); }
+  .toolbar button { background: transparent; color: var(--muted); border: 0; padding: 7px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; }
+  .toolbar button.on { background: var(--accent); color: #fff; }
+  .hint { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 12px; color: var(--muted);
+          background: rgba(18,18,18,.7); padding: 5px 12px; border-radius: 20px; pointer-events: none; white-space: nowrap; }
+  .hotspot { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #fff; background: var(--accent); color: #fff; font-weight: 700;
+             font-size: 12px; cursor: pointer; box-shadow: 0 0 0 4px rgba(200,100,46,.25); padding: 0; transition: transform .15s; }
+  .hotspot:hover, .hotspot.active { transform: scale(1.15); }
+  .hotspot[data-visible="false"] { opacity: .35; }
+  .viewer.nohot .hotspot { display: none; }
+  .note { position: absolute; left: 50%; bottom: 52px; transform: translateX(-50%); width: min(440px, calc(100% - 24px));
+          background: rgba(20,20,20,.92); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 8px;
+          padding: 12px 14px; font-size: 14px; display: none; }
+  .note.show { display: block; }
+  .note b { color: var(--accent2); display: block; margin-bottom: 2px; }
+
+  /* compare */
+  .compare { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 16 / 9; user-select: none; }
+  .compare img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .compare .top { clip-path: inset(0 50% 0 0); }
+  .compare input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: ew-resize; margin: 0; }
+  .compare .bar { position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: #fff; pointer-events: none; }
+  .compare .bar::after { content: "\2194"; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 38px; height: 38px;
+                         border-radius: 50%; background: var(--accent); display: grid; place-items: center; font-weight: 700; color: #fff; }
+  .tag { position: absolute; top: 12px; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; letter-spacing: .06em;
+         text-transform: uppercase; background: rgba(18,18,18,.8); pointer-events: none; }
+  .tag.l { left: 12px; } .tag.r { right: 12px; }
+
+  /* tabs + gallery */
+  .tabs { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+  .tabs button { background: var(--panel); border: 1px solid var(--line); color: var(--muted); padding: 8px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; }
+  .tabs button.on { color: #fff; border-color: var(--accent); background: rgba(200,100,46,.18); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+  .grid[hidden] { display: none; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .card img, .card video { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; cursor: zoom-in; background: #000; }
+  .card video { cursor: default; }
+  .card .cap { padding: 10px 14px; font-size: 14px; color: var(--muted); }
+  .card .cap b { color: var(--text); }
+
+  /* features */
+  .features { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .feat { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
+  .feat::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); opacity: .8; }
+  .feat p { color: var(--muted); margin: 0; font-size: 15px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+  .chip { background: var(--panel2); border: 1px solid var(--line); border-radius: 16px; padding: 4px 12px; font-size: 13px; color: #d6d0c7; }
+  .wide { border-radius: 12px; border: 1px solid var(--line); overflow: hidden; cursor: zoom-in; }
+
+  /* specs */
+  .specs { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+  .specs ul { margin: 0; padding-left: 18px; color: #d6d0c7; }
+  .specs li { margin: 4px 0; }
+  footer { padding: 34px 0 50px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); }
+
+  /* lightbox */
+  .lb { position: fixed; inset: 0; background: rgba(0,0,0,.92); display: none; place-items: center; z-index: 50; cursor: zoom-out; padding: 20px; }
+  .lb.show { display: grid; }
+  .lb img { max-height: 92vh; max-width: 96vw; border-radius: 8px; }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    model-viewer { height: 58vh; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Geometry Nodes · Blender 5.2 · Asset Library</div>
+      <h1>Ghost Town<br>Building Generator</h1>
+      <p class="lede">Weathered small-town architecture in seconds: shops, shacks, farmhouses and warehouses, from freshly
+        painted to falling apart. Drag a preset in, move a few sliders, render.</p>
+      <div class="stats">
+        <div class="stat"><b>15</b><span>building presets</span></div>
+        <div class="stat"><b>46</b><span>PBR materials</span></div>
+        <div class="stat"><b>13</b><span>material slots</span></div>
+        <div class="stat"><b>∞</b><span>random seeds</span></div>
+      </div>
+      <div class="cta">
+        <a class="btn primary" href="#gallery">See the renders</a>
+        <a class="btn" href="#features">What's inside</a>
+      </div>
+    </div>
+
+    <div class="viewer" id="viewer">
+      <model-viewer id="mv" src="assets/red_commercial.glb" alt="Red commercial building generated with the Ghost Town Building Generator"
+        camera-controls touch-action="pan-y" auto-rotate auto-rotate-delay="2500" rotation-per-second="12deg"
+        camera-orbit="-32deg 72deg 105%" min-camera-orbit="auto 15deg auto" max-camera-orbit="auto 88deg 220%"
+        shadow-intensity="1" shadow-softness="0.85" exposure="1.05" environment-image="neutral" tone-mapping="aces"
+        interaction-prompt="none" loading="eager">
+        <button class="hotspot" slot="hotspot-1" data-position="0 6.95 4.62" data-normal="0 0 1" data-n="1">1</button>
+        <button class="hotspot" slot="hotspot-2" data-position="-1.6 4.6 4.62" data-normal="0 0 1" data-n="2">2</button>
+        <button class="hotspot" slot="hotspot-3" data-position="-3.2 3.2 5.9" data-normal="0 1 0" data-n="3">3</button>
+        <button class="hotspot" slot="hotspot-4" data-position="1.5 8.6 0.6" data-normal="0 1 0" data-n="4">4</button>
+        <button class="hotspot" slot="hotspot-5" data-position="3.6 2.1 4.62" data-normal="0 0 1" data-n="5">5</button>
+        <button class="hotspot" slot="hotspot-6" data-position="5.2 0.18 4.66" data-normal="0 0 1" data-n="6">6</button>
+      </model-viewer>
+      <div class="toolbar">
+        <div class="grp"><button id="day" class="on">Day</button><button id="night">Night</button></div>
+        <div class="grp"><button id="spin" class="on">Auto-rotate</button></div>
+        <div class="grp"><button id="hot" class="on">Info points</button></div>
+        <div class="grp"><button id="reset">Reset</button></div>
+      </div>
+      <div class="note" id="note"></div>
+      <div class="hint">Drag to orbit · scroll / pinch to zoom · tap the numbers</div>
+    </div>
+  </header>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">One slider</div>
+    <h2>From kept-up to abandoned</h2>
+    <p class="sub">Weathering drives dirt, rain streaks, peeling paint, rust, chalky fading, broken and boarded windows and
+      sagging awnings, so every building gets its own character. Drag the handle.</p>
+    <div class="compare" id="compare">
+      <img src="assets/img/abandoned.jpg" alt="Abandoned buildings">
+      <img class="top" src="assets/img/clean.jpg" alt="Kept-up buildings">
+      <span class="tag l">Kept-up</span><span class="tag r">Abandoned</span>
+      <div class="bar"></div>
+      <input type="range" min="0" max="100" value="50" aria-label="Compare kept-up and abandoned">
+    </div>
+  </div>
+</section>
+
+<section id="gallery">
+  <div class="wrap">
+    <div class="eyebrow">Gallery</div>
+    <h2>Day, night and turntables</h2>
+    <p class="sub">All renders straight out of Blender (Cycles) with the included studio, day and night setups.</p>
+    <div class="tabs" role="tablist">
+      <button class="on" data-tab="day">Day</button>
+      <button data-tab="night">Night</button>
+      <button data-tab="turn">Turntables</button>
+    </div>
+    <div class="grid" data-pane="day">
+      <div class="card"><img loading="lazy" src="assets/img/pair_day.jpg" alt=""><div class="cap"><b>Red Commercial + Blue Shack</b> — the studio hero</div></div>
+      <div class="card"><img loading="lazy" src="assets/img/street.jpg" alt=""><div class="cap"><b>Main street</b> — five presets side by side</div></div>
+      <div class="card"><img loading="lazy" src="assets/img/blue_pair.jpg" alt=""><div class="cap"><b>Blue Commercial + Blue House</b></div></div>
+      <div class="card"><img loading="lazy" src="assets/img/western.jpg" alt=""><div class="cap"><b>General Store + Farmhouse</b></div></div>
+      <div class="card"><img loading="lazy" src="assets/img/brick.jpg" alt=""><div class="cap"><b>Brick Factory + Hardware &amp; Feed</b> — procedural brick bond</div></div>
+      <div class="card"><img loading="lazy" src="assets/img/clean.jpg" alt=""><div class="cap"><b>Stucco Cafe + Barn Cottage</b> — low weathering</div></div>
+    </div>
+    <div class="grid" data-pane="night" hidden>
+      <div class="card"><img loading="lazy" src="assets/img/pair_night.jpg" alt=""><div class="cap"><b>Night</b> — window, porch and street lights are real light instances</div></div>
+      <div class="card"><img loading="lazy" src="assets/img/door_night.jpg" alt=""><div class="cap"><b>Doors left ajar</b> — a lit hall spills light outside</div></div>
+      <div class="card"><img loading="lazy" src="assets/img/blue_night.jpg" alt=""><div class="cap"><b>Blue Commercial + Blue House</b> at night</div></div>
+      <div class="card"><img loading="lazy" src="assets/img/cover.jpg" alt=""><div class="cap"><b>Moonlight + practicals</b> — the included night world</div></div>
+    </div>
+    <div class="grid" data-pane="turn" hidden>
+      <div class="card"><video src="assets/video/all15.mp4" poster="assets/img/poster_all15.jpg" muted loop playsinline preload="none" controls></video><div class="cap"><b>All 15 presets</b> turning side by side</div></div>
+      <div class="card"><video src="assets/video/pair.mp4" poster="assets/img/poster_pair.jpg" muted loop playsinline preload="none" controls></video><div class="cap"><b>Studio turntable</b> — fixed lights, the buildings turn</div></div>
+      <div class="card"><video src="assets/video/night.mp4" poster="assets/img/poster_night.jpg" muted loop playsinline preload="none" controls></video><div class="cap"><b>Night turntable</b></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="eyebrow">Features</div>
+    <h2>Everything is a parameter</h2>
+    <p class="sub">One Geometry Nodes modifier builds the whole lot. Nothing is destructive; Realize turns it into plain geometry for export.</p>
+    <div class="features">
+      <div class="feat"><h3>Layout &amp; wings</h3><p>Bays, floors, floor height and two extra wings for L, T and U plans. Random Layout gives a new building on every seed.</p></div>
+      <div class="feat"><h3>Roofs</h3><p>Flat with parapets or false fronts, gable and hip roofs with dormers, chimneys, gutters, rooftop units and weatherhead masts.</p></div>
+      <div class="feat"><h3>Facades</h3><p>Board &amp; batten, clapboard, brick or plain; doors, shopfronts, windows, ribbon windows and warehouse doors by weight.</p></div>
+      <div class="feat"><h3>Weathering</h3><p>Dirt, rain streaks, peeling paint, rust and fading follow one slider; Imperfections shift and drop planks and lean the posts.</p></div>
+      <div class="feat"><h3>Light instancing</h3><p>Room lights behind lit windows, porch lamps, the street lamp and lit halls behind open doors come with the building.</p></div>
+      <div class="feat"><h3>Porches &amp; extras</h3><p>Corrugated awnings sheet by sheet, porch decks, balconies with stairs, signs with 3D lettering, window AC units, meters, lamps.</p></div>
+      <div class="feat"><h3>Street furniture</h3><p>Single and H-frame utility poles with transformers, power lines beside the building and a service drop to the wall.</p></div>
+      <div class="feat"><h3>No visible tiling</h3><p>Bricks, stone and sheet metal are procedural; image textures are broken up with offset samples and multi-scale noise.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Presets</div>
+    <h2>15 building types</h2>
+    <p class="sub">Each preset is a fully editable starting point in the Asset Browser.</p>
+    <img class="wide" src="assets/img/types.jpg" alt="All 15 building presets" loading="lazy">
+    <div class="chips">
+      <span class="chip">Red Commercial</span><span class="chip">Blue Shack</span><span class="chip">Blue Commercial</span>
+      <span class="chip">Red Two-Story</span><span class="chip">Blue House</span><span class="chip">Red Brick Commercial</span>
+      <span class="chip">Western General Store</span><span class="chip">Farmhouse</span><span class="chip">Barn-Red Cottage</span>
+      <span class="chip">Corrugated Warehouse</span><span class="chip">Stucco Cafe</span><span class="chip">Abandoned House</span>
+      <span class="chip">Brick Factory</span><span class="chip">Green Boarding House</span><span class="chip">Random Building</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="eyebrow">Materials</div>
+    <h2>46 PBR materials</h2>
+    <p class="sub">Painted boards, siding, brick, plaster, stone, corrugated and galvanised sheet, roofing, trims, doors, wood and metal — drop any of them on the modifier's slots.</p>
+    <img class="wide" src="assets/img/materials.jpg" alt="Material library" loading="lazy">
+  </div>
+</section>
+
+<section>
+  <div class="wrap specs">
+    <div>
+      <h3>What's included</h3>
+      <ul>
+        <li>Asset library .blend: generator node group, 15 presets, materials, props, module kit</li>
+        <li>Studio, day, dusk and night worlds</li>
+        <li>Asset Browser catalogs with custom previews</li>
+        <li>Textures and HDRIs (relative paths)</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Requirements</h3>
+      <ul>
+        <li>Built and tested in Blender 5.2</li>
+        <li>Renders in Cycles and EEVEE</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Licenses</h3>
+      <ul>
+        <li>Textures &amp; HDRIs: CC0, ambientCG</li>
+        <li>Props: CC0 models from BlendSwap</li>
+        <li>Generator, kit and shaders made for this product</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">Ghost Town Building Generator · the 3D preview above is a texture-baked web version of one preset; the
+    product itself is fully procedural.</div>
+</footer>
+
+<div class="lb" id="lb"><img alt=""></div>
+
+<script>
+  const mv = document.getElementById('mv');
+  const viewer = document.getElementById('viewer');
+  const note = document.getElementById('note');
+  const NOTES = {
+    1: ['Corrugated parapet', 'A separate rusty sheet-metal band with its own material slot.'],
+    2: ['Ribbon windows', 'Pane by pane: intact, cardboard-covered or smashed; some glow from inside at night.'],
+    3: ['Striped awnings', 'Every corrugated sheet gets its own paint and rust; broken ones lose and slip sheets.'],
+    4: ['Rooftop', 'Weatherhead masts with porcelain insulators, AC units and roof hatches.'],
+    5: ['Weathered boards', 'Paint peels along the grain, each plank has its own tone, rain streaks run down.'],
+    6: ['Stone plinth', 'Procedural block course with ground splash grime that fades up the wall.']
+  };
+  const on = (el, v) => el.classList.toggle('on', v);
+
+  // day / night
+  function setMode(night) {
+    on(document.getElementById('day'), !night); on(document.getElementById('night'), night);
+    viewer.classList.toggle('night', night);
+    mv.exposure = night ? 0.32 : 1.05;
+    mv.shadowIntensity = night ? 0.4 : 1;
+    const mats = mv.model ? mv.model.materials : [];
+    for (const m of mats) {
+      if (m.setEmissiveStrength) m.setEmissiveStrength(night ? 9 : 1);
+      else m.setEmissiveFactor(night ? [1, 1, 1] : [0.4, 0.4, 0.4]);
+    }
+  }
+  document.getElementById('day').onclick = () => setMode(false);
+  document.getElementById('night').onclick = () => setMode(true);
+  mv.addEventListener('load', () => setMode(viewer.classList.contains('night')));
+
+  const spin = document.getElementById('spin');
+  spin.onclick = () => { mv.autoRotate = !mv.autoRotate; on(spin, mv.autoRotate); };
+  const hot = document.getElementById('hot');
+  hot.onclick = () => { const v = viewer.classList.toggle('nohot'); on(hot, !v); note.classList.remove('show'); };
+  document.getElementById('reset').onclick = () => { mv.cameraOrbit = '-32deg 72deg 105%'; mv.cameraTarget = 'auto auto auto'; note.classList.remove('show'); };
+
+  document.querySelectorAll('.hotspot').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation();
+    const [t, d] = NOTES[b.dataset.n];
+    const active = b.classList.contains('active');
+    document.querySelectorAll('.hotspot').forEach(x => x.classList.remove('active'));
+    if (active) { note.classList.remove('show'); return; }
+    b.classList.add('active');
+    note.innerHTML = '<b>' + t + '</b>' + d;
+    note.classList.add('show');
+    mv.autoRotate = false; on(spin, false);
+  }));
+
+  // compare slider
+  const cmp = document.getElementById('compare');
+  const cmpIn = cmp.querySelector('input');
+  cmpIn.addEventListener('input', () => {
+    cmp.querySelector('.top').style.clipPath = 'inset(0 ' + (100 - cmpIn.value) + '% 0 0)';
+    cmp.querySelector('.bar').style.left = cmpIn.value + '%';
+  });
+
+  // gallery tabs
+  document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
+    document.querySelectorAll('.tabs button').forEach(x => on(x, x === b));
+    document.querySelectorAll('[data-pane]').forEach(p => p.hidden = p.dataset.pane !== b.dataset.tab);
+    document.querySelectorAll('video').forEach(v => { if (b.dataset.tab === 'turn' && v.closest('[data-pane="turn"]')) v.play().catch(() => {}); else v.pause(); });
+  });
+
+  // lightbox
+  const lb = document.getElementById('lb');
+  document.querySelectorAll('.card img, img.wide').forEach(i => i.addEventListener('click', () => {
+    lb.querySelector('img').src = i.src; lb.classList.add('show');
+  }));
+  lb.onclick = () => lb.classList.remove('show');
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('show'); });
+</script>
+</body>
+</html>

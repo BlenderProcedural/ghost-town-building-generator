@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ghost Town Building – 3D preview</title>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; background: #141414; color: #ebe6de; font: 13px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
+  body { background: radial-gradient(ellipse at 50% 40%, #2b2b2b 0%, #141414 70%); transition: background .6s; }
+  body.night { background: radial-gradient(ellipse at 50% 40%, #141a24 0%, #07090d 75%); }
+  model-viewer { width: 100%; height: 100%; --poster-color: transparent; --progress-bar-color: #c8642e; }
+  .bar { position: fixed; top: 10px; left: 10px; display: inline-flex; background: rgba(18,18,18,.8); border: 1px solid #2e2e2e; border-radius: 9px; padding: 3px; }
+  .bar button { background: transparent; color: #9b958c; border: 0; padding: 6px 12px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+  .bar button.on { background: #c8642e; color: #fff; }
+  .hint { position: fixed; bottom: 10px; left: 50%; transform: translateX(-50%); color: #9b958c; background: rgba(18,18,18,.7); padding: 4px 12px; border-radius: 20px; white-space: nowrap; }
+</style>
+</head>
+<body>
+<model-viewer id="mv" src="assets/red_commercial.glb" alt="Ghost Town Building Generator – red commercial preset"
+  camera-controls touch-action="pan-y" auto-rotate auto-rotate-delay="2000" rotation-per-second="12deg"
+  camera-orbit="-32deg 72deg 105%" min-camera-orbit="auto 15deg auto" max-camera-orbit="auto 88deg 220%"
+  shadow-intensity="1" shadow-softness="0.85" exposure="1.05" environment-image="neutral" tone-mapping="aces" interaction-prompt="none"></model-viewer>
+<div class="bar"><button id="day" class="on">Day</button><button id="night">Night</button></div>
+<div class="hint">Drag to orbit · scroll / pinch to zoom</div>
+<script>
+  const mv = document.getElementById('mv');
+  function setMode(night) {
+    document.getElementById('day').classList.toggle('on', !night);
+    document.getElementById('night').classList.toggle('on', night);
+    document.body.classList.toggle('night', night);
+    mv.exposure = night ? 0.32 : 1.05;
+    mv.shadowIntensity = night ? 0.4 : 1;
+    for (const m of (mv.model ? mv.model.materials : [])) {
+      if (m.setEmissiveStrength) m.setEmissiveStrength(night ? 9 : 1);
+      else m.setEmissiveFactor(night ? [1, 1, 1] : [0.4, 0.4, 0.4]);
+    }
+  }
+  document.getElementById('day').onclick = () => setMode(false);
+  document.getElementById('night').onclick = () => setMode(true);
+  mv.addEventListener('load', () => setMode(document.body.classList.contains('night')));
+</script>
+</body>
+</html>
