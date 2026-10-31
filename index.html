@@ -73,6 +73,9 @@
   .tabs button.on { color: #fff; border-color: var(--accent); background: rgba(200,100,46,.18); }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
   .grid[hidden] { display: none; }
+  .grid.turns { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .grid.turns .card.big { grid-column: 1 / -1; }
+  .grid.turns .card:not(.big) .cap { font-size: 13px; padding: 8px 10px; }
   .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
   .card img, .card video { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; cursor: zoom-in; background: #000; }
   .card video { cursor: default; }
@@ -86,7 +89,13 @@
   .feat p { color: var(--muted); margin: 0; font-size: 15px; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
   .chip { background: var(--panel2); border: 1px solid var(--line); border-radius: 16px; padding: 4px 12px; font-size: 13px; color: #d6d0c7; }
-  .wide { border-radius: 12px; border: 1px solid var(--line); overflow: hidden; cursor: zoom-in; }
+  .types { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+  .types figure { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+                  transition: transform .2s, border-color .2s; }
+  .types figure:hover { transform: translateY(-3px); border-color: var(--accent); }
+  .types img { width: 100%; aspect-ratio: 16 / 15; object-fit: cover; cursor: zoom-in; }
+  .types figcaption { padding: 9px 12px; font-size: 14px; font-weight: 600; }
+  .types figcaption span { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
 
   /* specs */
   .specs { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
@@ -101,6 +110,8 @@
 
   @media (max-width: 900px) {
     .hero { grid-template-columns: 1fr; }
+    .grid.turns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .types { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     model-viewer { height: 58vh; }
   }
 </style>
@@ -185,8 +196,8 @@
       <div class="card"><img loading="lazy" src="assets/img/blue_night.jpg" alt=""><div class="cap"><b>Blue Commercial + Blue House</b> at night</div></div>
       <div class="card"><img loading="lazy" src="assets/img/cover.jpg" alt=""><div class="cap"><b>Moonlight + practicals</b> — the included night world</div></div>
     </div>
-    <div class="grid" data-pane="turn" hidden>
-      <div class="card"><img loading="lazy" src="assets/gif/all15.gif" alt=""><div class="cap"><b>All 15 presets</b> turning side by side</div></div>
+    <div class="grid turns" data-pane="turn" hidden>
+      <div class="card big"><img loading="lazy" src="assets/gif/all15.gif" alt=""><div class="cap"><b>All 15 presets</b> turning side by side</div></div>
       <div class="card"><img loading="lazy" src="assets/gif/pair.gif" alt=""><div class="cap"><b>Studio turntable</b> — fixed lights, the buildings turn</div></div>
       <div class="card"><img loading="lazy" src="assets/gif/night.gif" alt=""><div class="cap"><b>Night turntable</b> — real light instances</div></div>
       <div class="card"><img loading="lazy" src="assets/gif/blue_commercial.gif" alt=""><div class="cap"><b>Blue Commercial</b></div></div>
@@ -218,13 +229,22 @@
     <div class="eyebrow">Presets</div>
     <h2>15 building types</h2>
     <p class="sub">Each preset is a fully editable starting point in the Asset Browser.</p>
-    <img class="wide" src="assets/img/types.jpg" alt="All 15 building presets" loading="lazy">
-    <div class="chips">
-      <span class="chip">Red Commercial</span><span class="chip">Blue Shack</span><span class="chip">Blue Commercial</span>
-      <span class="chip">Red Two-Story</span><span class="chip">Blue House</span><span class="chip">Red Brick Commercial</span>
-      <span class="chip">Western General Store</span><span class="chip">Farmhouse</span><span class="chip">Barn-Red Cottage</span>
-      <span class="chip">Corrugated Warehouse</span><span class="chip">Stucco Cafe</span><span class="chip">Abandoned House</span>
-      <span class="chip">Brick Factory</span><span class="chip">Green Boarding House</span><span class="chip">Random Building</span>
+    <div class="types">
+      <figure><img loading="lazy" src="assets/img/types/RedCommercial.jpg" alt=""><figcaption>Red Commercial</figcaption></figure>
+      <figure><img loading="lazy" src="assets/img/types/BlueShack.jpg" alt=""><figcaption>Blue Shack</figcaption></figure>
+      <figure><img loading="lazy" src="assets/img/types/BlueCommercial.jpg" alt=""><figcaption>Blue Commercial</figcaption></figure>
+      <figure><img loading="lazy" src="assets/img/types/RedTwoStory.jpg" alt=""><figcaption>Red Two-Story</figcaption></figure>
+      <figure><img loading="lazy" src="assets/img/types/BlueHouse.jpg" alt=""><figcaption>Blue House</figcaption></figure>
+      <figure><img loading="lazy" src="assets/img/types/RedBrickCommercial.jpg" alt=""><figcaption>Red Brick Commercial</figcaption></figure>
+      <figure><img loading="lazy" src="assets/img/types/WesternGeneralStore.jpg" alt=""><figcaption>Western General Store</figcaption></figure>
+      <figure><img loading="lazy" src="assets/img/types/Farmhouse.jpg" alt=""><figcaption>Farmhouse</figcaption></figure>
+      <figure><img loading="lazy" src="assets/img/types/BarnRedCottage.jpg" alt=""><figcaption>Barn-Red Cottage</figcaption></figure>
+      <figure><img loading="lazy" src="assets/img/types/CorrugatedWarehouse.jpg" alt=""><figcaption>Corrugated Warehouse</figcaption></figure>
+      <figure><img loading="lazy" src="assets/img/types/StuccoCafe.jpg" alt=""><figcaption>Stucco Cafe</figcaption></figure>
+      <figure><img loading="lazy" src="assets/img/types/AbandonedHouse.jpg" alt=""><figcaption>Abandoned House</figcaption></figure>
+      <figure><img loading="lazy" src="assets/img/types/BrickFactory.jpg" alt=""><figcaption>Brick Factory</figcaption></figure>
+      <figure><img loading="lazy" src="assets/img/types/GreenBoardingHouse.jpg" alt=""><figcaption>Green Boarding House</figcaption></figure>
+      <figure><img loading="lazy" src="assets/img/types/RandomBuilding.jpg" alt=""><figcaption>Random Building <span>new on every seed</span></figcaption></figure>
     </div>
   </div>
 </section>
@@ -328,7 +348,7 @@
 
   // lightbox
   const lb = document.getElementById('lb');
-  document.querySelectorAll('.card img, img.wide').forEach(i => i.addEventListener('click', () => {
+  document.querySelectorAll('.card img, .types img').forEach(i => i.addEventListener('click', () => {
     lb.querySelector('img').src = i.src; lb.classList.add('show');
   }));
   lb.onclick = () => lb.classList.remove('show');
