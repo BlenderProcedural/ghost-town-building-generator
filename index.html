@@ -186,9 +186,11 @@
       <div class="card"><img loading="lazy" src="assets/img/cover.jpg" alt=""><div class="cap"><b>Moonlight + practicals</b> — the included night world</div></div>
     </div>
     <div class="grid" data-pane="turn" hidden>
-      <div class="card"><video src="assets/video/all15.mp4" poster="assets/img/poster_all15.jpg" muted loop playsinline preload="none" controls></video><div class="cap"><b>All 15 presets</b> turning side by side</div></div>
-      <div class="card"><video src="assets/video/pair.mp4" poster="assets/img/poster_pair.jpg" muted loop playsinline preload="none" controls></video><div class="cap"><b>Studio turntable</b> — fixed lights, the buildings turn</div></div>
-      <div class="card"><video src="assets/video/night.mp4" poster="assets/img/poster_night.jpg" muted loop playsinline preload="none" controls></video><div class="cap"><b>Night turntable</b></div></div>
+      <div class="card"><img loading="lazy" src="assets/gif/all15.gif" alt=""><div class="cap"><b>All 15 presets</b> turning side by side</div></div>
+      <div class="card"><img loading="lazy" src="assets/gif/pair.gif" alt=""><div class="cap"><b>Studio turntable</b> — fixed lights, the buildings turn</div></div>
+      <div class="card"><img loading="lazy" src="assets/gif/night.gif" alt=""><div class="cap"><b>Night turntable</b> — real light instances</div></div>
+      <div class="card"><img loading="lazy" src="assets/gif/blue_commercial.gif" alt=""><div class="cap"><b>Blue Commercial</b></div></div>
+      <div class="card"><img loading="lazy" src="assets/gif/farmhouse.gif" alt=""><div class="cap"><b>Farmhouse</b> — kept-up, low weathering</div></div>
     </div>
   </div>
 </section>
@@ -224,15 +226,6 @@
       <span class="chip">Corrugated Warehouse</span><span class="chip">Stucco Cafe</span><span class="chip">Abandoned House</span>
       <span class="chip">Brick Factory</span><span class="chip">Green Boarding House</span><span class="chip">Random Building</span>
     </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <div class="eyebrow">Materials</div>
-    <h2>46 PBR materials</h2>
-    <p class="sub">Painted boards, siding, brick, plaster, stone, corrugated and galvanised sheet, roofing, trims, doors, wood and metal — drop any of them on the modifier's slots.</p>
-    <img class="wide" src="assets/img/materials.jpg" alt="Material library" loading="lazy">
   </div>
 </section>
 
@@ -331,9 +324,7 @@
   // gallery tabs
   document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
     document.querySelectorAll('.tabs button').forEach(x => on(x, x === b));
-    document.querySelectorAll('[data-pane]').forEach(p => p.hidden = p.dataset.pane !== b.dataset.tab);
-    document.querySelectorAll('video').forEach(v => { if (b.dataset.tab === 'turn' && v.closest('[data-pane="turn"]')) v.play().catch(() => {}); else v.pause(); });
-  });
+    document.querySelectorAll('[data-pane]').forEach(p => p.hidden = p.dataset.pane !== b.dataset.tab);  });
 
   // lightbox
   const lb = document.getElementById('lb');
