@@ -38,7 +38,7 @@
   }
   document.getElementById('day').onclick = () => setMode(false);
   document.getElementById('night').onclick = () => setMode(true);
-  mv.addEventListener('load', () => setMode(document.body.classList.contains('night')));
+  mv.addEventListener('load', () => setMode(false));            // always opens in daylight
 </script>
 </body>
 </html>

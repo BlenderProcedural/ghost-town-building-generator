@@ -27,11 +27,7 @@
 
   /* hero */
   .hero { padding: 36px 0 48px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 32px; align-items: center; }
-  .stats { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 26px; }
-  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; min-width: 112px; }
-  .stat b { display: block; font-size: 22px; color: var(--accent2); line-height: 1.1; }
-  .stat span { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
-  .cta { display: inline-flex; gap: 12px; flex-wrap: wrap; }
+  .cta { display: inline-flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
   .btn { display: inline-block; padding: 11px 18px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel2); color: var(--text);
          text-decoration: none; font-weight: 600; cursor: pointer; font-size: 14px; }
   .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
@@ -118,12 +114,6 @@
       <h1>Ghost Town<br>Building Generator</h1>
       <p class="lede">Weathered small-town architecture in seconds: shops, shacks, farmhouses and warehouses, from freshly
         painted to falling apart. Drag a preset in, move a few sliders, render.</p>
-      <div class="stats">
-        <div class="stat"><b>15</b><span>building presets</span></div>
-        <div class="stat"><b>46</b><span>PBR materials</span></div>
-        <div class="stat"><b>13</b><span>material slots</span></div>
-        <div class="stat"><b>∞</b><span>random seeds</span></div>
-      </div>
       <div class="cta">
         <a class="btn primary" href="#gallery">See the renders</a>
         <a class="btn" href="#features">What's inside</a>
@@ -310,7 +300,7 @@
   }
   document.getElementById('day').onclick = () => setMode(false);
   document.getElementById('night').onclick = () => setMode(true);
-  mv.addEventListener('load', () => setMode(viewer.classList.contains('night')));
+  mv.addEventListener('load', () => setMode(false));            // always opens in daylight
 
   const spin = document.getElementById('spin');
   spin.onclick = () => { mv.autoRotate = !mv.autoRotate; on(spin, mv.autoRotate); };
